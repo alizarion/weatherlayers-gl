@@ -10,8 +10,10 @@ existing Mercator behavior is preserved. This prevents globe particle positions 
 being amplified during zoom transitions when WeatherLayers is integrated with
 MapLibre's `vertical-perspective` projection.
 
-The fork also defines an npm `prepare` script so installations pinned to a Git commit
-build the exported `dist/` artifacts from the published source.
+The fork tracks the generated npm `dist/` exports on this branch so installations
+pinned to a Git commit are immediately usable and do not rebuild the package during
+consumer installation. The generated files are built from the source in the same
+commit with `npm run build`.
 
 ## License
 

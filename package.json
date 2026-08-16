@@ -51,7 +51,6 @@
     "build": "rimraf dist && NODE_OPTIONS=--max-old-space-size=8192 rollup -c",
     "dev": "NODE_OPTIONS=--max-old-space-size=8192 rollup -c -w",
     "test": "tsx --test src/**/*.test.ts",
-    "prepare": "npm run build",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
