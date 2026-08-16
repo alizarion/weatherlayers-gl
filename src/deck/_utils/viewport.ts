@@ -56,6 +56,14 @@ export function getViewportZoom(viewport: Viewport): number {
   return isViewportGlobe(viewport) ? Math.log2(viewport.scale) : viewport.zoom;
 }
 
+export function getViewportZoomChangeFactor(viewport: Viewport, previousViewportZoom: number | undefined): number {
+  if (isViewportGlobe(viewport)) {
+    return 0;
+  }
+
+  return 2 ** ((typeof previousViewportZoom === 'number' ? previousViewportZoom - getViewportZoom(viewport) : 0) * 4);
+}
+
 // see https://github.com/visgl/deck.gl/issues/9592
 export function getViewportPixelOffset(viewport: Viewport, offset: number): number {
   return offset * (isViewportGlobe(viewport) ? -1 : 1);

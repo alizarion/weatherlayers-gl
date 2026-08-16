@@ -8,7 +8,7 @@ import {DEFAULT_LINE_WIDTH, DEFAULT_LINE_COLOR, ensureDefaultProps} from '../../
 import {ImageInterpolation} from '../../_utils/image-interpolation.js';
 import {ImageType} from '../../_utils/image-type.js';
 import type {ImageUnscale} from '../../_utils/image-unscale.js';
-import {isViewportGlobe, isViewportMercator, isViewportInZoomBounds, getViewportGlobeCenter, getViewportGlobeRadius, getViewportBounds, getViewportZoom} from '../../_utils/viewport.js';
+import {isViewportGlobe, isViewportMercator, isViewportInZoomBounds, getViewportGlobeCenter, getViewportGlobeRadius, getViewportBounds, getViewportZoom, getViewportZoomChangeFactor} from '../../_utils/viewport.js';
 import {parsePalette} from '../../_utils/palette.js';
 import type {Palette} from '../../_utils/palette.js';
 import {createPaletteTexture} from '../../_utils/palette-texture.js';
@@ -317,7 +317,7 @@ export class ParticleLineLayer<ExtraPropsT extends {} = {}> extends LineLayer<un
     const viewportGlobeCenter = isViewportGlobe(viewport) ? getViewportGlobeCenter(viewport) : undefined;
     const viewportGlobeRadius = isViewportGlobe(viewport) ? getViewportGlobeRadius(viewport) : undefined;
     const viewportBounds = isViewportMercator(viewport) ? getViewportBounds(viewport) : undefined;
-    const viewportZoomChangeFactor = 2 ** ((typeof previousViewportZoom === 'number' ? previousViewportZoom - getViewportZoom(viewport) : 0) * 4);
+    const viewportZoomChangeFactor = getViewportZoomChangeFactor(viewport, previousViewportZoom);
 
     // speed factor for current zoom level
     const currentSpeedFactor = speedFactor / 2 ** (getViewportZoom(viewport) + 7);
