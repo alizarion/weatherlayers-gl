@@ -65,17 +65,47 @@ export function createTextureCached(device: Device, image: TextureData, repeat: 
   return texture;
 }
 
-// empty texture required instead of null
-let emptyTexture: Texture | null = null;
+// One fallback per live context, never a handle from another/lost device.
+type EmptyTextureEntry = {texture: Texture; invalidate: () => void};
+const emptyTextures = new WeakMap<Device, EmptyTextureEntry>();
+const canvasEmptyTextures = new WeakMap<EventTarget, EmptyTextureEntry>();
 
 export function createEmptyTextureCached(device: Device): Texture {
-  if (!emptyTexture) {
-    emptyTexture = device.createTexture({
+  let entry = emptyTextures.get(device);
+  if (entry?.texture.destroyed) {
+    entry.invalidate();
+    entry = undefined;
+  }
+  if (!entry) {
+    const canvas = device.canvasContext?.canvas;
+    // Deck may replace its device while reusing the MapLibre canvas.
+    if (canvas) canvasEmptyTextures.get(canvas)?.invalidate();
+    const texture = device.createTexture({
       width: 1,
       height: 1,
       mipLevels: 1,
     });
-    emptyTexture.copyImageData({data: new Uint8Array([0, 0, 0, 0])});
+    try {
+      texture.copyImageData({data: new Uint8Array([0, 0, 0, 0])});
+    } catch (error) {
+      texture.destroy();
+      throw error;
+    }
+    const ownedEntry: EmptyTextureEntry = {
+      texture,
+      invalidate: () => {
+        canvas?.removeEventListener('webglcontextlost', ownedEntry.invalidate);
+        if (emptyTextures.get(device) === ownedEntry) emptyTextures.delete(device);
+        if (canvas && canvasEmptyTextures.get(canvas) === ownedEntry) canvasEmptyTextures.delete(canvas);
+        texture.destroy();
+      },
+    };
+    emptyTextures.set(device, ownedEntry);
+    if (canvas) {
+      canvasEmptyTextures.set(canvas, ownedEntry);
+      canvas.addEventListener('webglcontextlost', ownedEntry.invalidate, {once: true});
+    }
+    entry = ownedEntry;
   }
-  return emptyTexture;
+  return entry.texture;
 }

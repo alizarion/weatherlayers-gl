@@ -1,6 +1,6 @@
 {
   "name": "weatherlayers-gl",
-  "version": "2026.5.2-macoui.2",
+  "version": "2026.5.2-macoui.3",
   "description": "WeatherLayers GL - Weather Visualization Layers for deck.gl",
   "keywords": [
     "deck.gl",

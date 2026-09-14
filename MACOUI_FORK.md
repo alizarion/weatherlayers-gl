@@ -35,3 +35,14 @@ entries for source-owned textures and never destroys borrowed handles. Existing
 
 Validation: `npm test`, then `npm run build` and
 `node --test tests/particle-texture-source.test.mjs`.
+
+## Context-safe fallback textures (macoui.3)
+
+The transparent fallback texture is cached per device and invalidated on WebGL
+context loss. Replacing a device on the same canvas releases the old fallback and
+its listener. Restoring the same device also creates a fresh texture. This prevents
+binding invalid handles after restoration while retaining at most one fallback
+per canvas, with no frame history or additional GRIB allocations.
+
+Validation adds repeated-loss and device-replacement tests in
+`src/deck/_utils/texture.test.ts`.
