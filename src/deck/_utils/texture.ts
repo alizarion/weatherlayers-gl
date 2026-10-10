@@ -19,17 +19,21 @@ function getTextureFormat(device: Device, image: TextureData): TextureFormat {
       throw new Error('Unsupported data format');
     }
   } else if (data instanceof Float32Array) {
-    if (!device.features.has('float32-renderable-webgl')) {
-      throw new Error('Float textures are required');
-    }
-
+    let format: TextureFormat;
     if (bandsCount === 2) {
-      return 'rg32float';
+      format = 'rg32float';
     } else if (bandsCount === 1) {
-      return 'r32float';
+      format = 'r32float';
     } else {
       throw new Error('Unsupported data format');
     }
+
+    // Float textures are only sampled with `nearest` (custom interpolation in pixel.glsl),
+    // never rendered to: check creation/sampling, not EXT_color_buffer_float (missing on Mali-T720).
+    if (!device.isTextureFormatSupported(format)) {
+      throw new Error('Float texture sampling is required');
+    }
+    return format;
   } else {
     throw new Error('Unsupported data format');
   }
